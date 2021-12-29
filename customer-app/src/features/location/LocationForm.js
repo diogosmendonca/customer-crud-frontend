@@ -3,7 +3,7 @@ import React from 'react';
 export default function LocationForm(){
     return(
         <>
-            <div className="modal fade" id="locationForm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div className="modal fade" id="locationForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
                     <div className="modal-header">
@@ -13,19 +13,19 @@ export default function LocationForm(){
                     <div className="modal-body">
                         <form>
                             <div className="mb-3">
-                                <label for="address" className="form-label">Address</label>
+                                <label htmlFor="address" className="form-label">Address</label>
                                 <input type="text" className="form-control" id="address" name="address"/>
                             </div>
                             <div className="mb-3">
-                                <label for="city" className="form-label">City</label>
+                                <label htmlFor="city" className="form-label">City</label>
                                 <input type="text" className="form-control" id="city" name="city"/>
                             </div>
                             <div className="mb-3">
-                                <label for="state" className="form-label">State</label>
+                                <label htmlFor="state" className="form-label">State</label>
                                 <input type="text" className="form-control" id="state" name="state"/>
                             </div>
                             <div className="mb-3">
-                                <label for="zip" className="form-label">Zip Code</label>
+                                <label htmlFor="zip" className="form-label">Zip Code</label>
                                 <input type="text" className="form-control" id="zip" name="zip"/>
                             </div>
                         </form>

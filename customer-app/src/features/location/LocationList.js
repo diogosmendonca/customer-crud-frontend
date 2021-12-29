@@ -3,7 +3,7 @@ import React from 'react';
 
 function DeleteConfirmationModal(){
     return(
-        <div className="modal fade" id="deleteLocationConfirm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal fade" id="deleteLocationConfirm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog">
             <div className="modal-content">
             <div className="modal-header">
@@ -26,7 +26,7 @@ function DeleteConfirmationModal(){
 export default function LocationList(){
     return(
         <>
-            <div className="modal fade " id="locationList" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div className="modal fade " id="locationList" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-xl modal-fullscreen-lg-down">
                     <div className="modal-content">
                     <div className="modal-header">
@@ -34,7 +34,7 @@ export default function LocationList(){
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">
-                        <p><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationForm">New Location</button></p>
+                        <p><button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationForm">New Location</button></p>
                         <table className="table table-striped">
                             <thead className="table-light ">
                                 <tr>
@@ -53,7 +53,7 @@ export default function LocationList(){
                                 <td>East Loyview</td>
                                 <td>Minnesota</td>
                                 <td>14204</td>
-                                <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
+                                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
                             </tr>
                             <tr>
                                 <td>2</td>
@@ -61,7 +61,7 @@ export default function LocationList(){
                                 <td>Lake Margretbury</td>
                                 <td>California</td>
                                 <td>18400</td>
-                                <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
+                                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
                             </tr>
                             </tbody>
                         </table>

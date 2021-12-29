@@ -1,12 +1,15 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import LocationForm from '../location/LocationForm';
 import LocationList from '../location/LocationList';
 import CustomerForm from './CustomerForm';
+import {useSelector, useDispatch} from 'react-redux';
+import {deleteCustomersServer, fetchCustomers, selectAllCustomers} from './CustomersSlice'
+
 
 
 function DeleteConfirmationModal(){
     return(
-        <div className="modal fade" id="deleteCustomerConfirm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal fade" id="deleteCustomerConfirm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog">
             <div className="modal-content">
             <div className="modal-header">
@@ -26,13 +29,34 @@ function DeleteConfirmationModal(){
     )
 }
 
+function CustomerLine(props){
 
-export default function CustomerList(){
-    return(
-        <>
-            <h1>Customers List</h1>
-            <br/>
-            <p><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">New Customer</button></p>
+    if(props != null && props.customer != null && props.customer.id != null){
+        let customer = props.customer;
+        return(
+            <tr>
+                <td>{customer.id}</td>
+                <td>{customer.first_name}</td>
+                <td>{customer.last_name}</td>
+                <td>{customer.email}</td>
+                <td>{customer.phone}</td>
+                <td><button type="button" className="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">{customer.locations.length} Location(s)</button></td>
+                <td><button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">Update</button></td>
+                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCustomerConfirm">Delete</button></td>
+            </tr>
+        );
+    }else{
+        return(
+            <tr>
+                <td colSpan={8}>It was not possible to show the customer.</td>
+            </tr>
+        );
+    }
+}
+
+function CustomerTable(props){
+    if(props != null && props.customers != null && props.customers.length > 0){
+        return(
             <table className="table table-striped">
                 <thead className="table-light ">
                     <tr>
@@ -47,28 +71,49 @@ export default function CustomerList(){
                     </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Diogo</td>
-                    <td>Mendonça</td>
-                    <td>diogosmendonca@gmail.com</td>
-                    <td>(21) 971771155</td>
-                    <td><button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">1 Location(s)</button></td>
-                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">Update</button></td>
-                    <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCustomerConfirm">Delete</button></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Taliha</td>
-                    <td>Mendonça</td>
-                    <td>talihavet@gmail.com</td>
-                    <td>(21) 99625-0054</td>
-                    <td><button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">2 Location(s)</button></td>
-                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">Update</button></td>
-                    <td><button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCustomerConfirm">Delete</button></td>
-                </tr>
+                    {props.customers.map((customer) => <CustomerLine key={customer.id} customer={customer} />)}
                 </tbody>
             </table>
+            );
+    }else{
+        return(<div>No customers found.</div>)
+    }
+    
+}
+
+export default function CustomerList(){
+
+    const customers = useSelector(selectAllCustomers)
+    const status = useSelector(state => state.customers.status);
+    const error = useSelector(state => state.customers.error);
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (status === 'not_loaded' ) {
+            dispatch(fetchCustomers())
+        }
+    }, [status, dispatch])
+    
+    
+    let customerTable;
+    if(status === 'loaded' || status === 'saved' || status === 'deleted'){
+      customerTable = <CustomerTable customers={customers} />;
+    }else if(status === 'loading'){
+      customerTable = <div >Loading customers...</div>;
+    }else if(status === 'not_loaded'){
+      customerTable = '';
+    }else{
+      //status === 'failed' or any other
+      customerTable = <div>Error: {error}</div>;
+    }
+    
+    return(
+        <>
+            <h1>Customers List</h1>
+            <br/>
+            <p><button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">New Customer</button></p>
+            {customerTable}
             <CustomerForm/>
             <DeleteConfirmationModal />
             <LocationList />
