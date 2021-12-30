@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import LocationForm from '../location/LocationForm';
 import LocationList from '../location/LocationList';
 import CustomerForm from './CustomerForm';
 import {useSelector, useDispatch} from 'react-redux';
 import {deleteCustomerServer, fetchCustomers, selectAllCustomers} from './CustomersSlice'
+import {setLocations} from '../location/LocationsSlice'
 
 
 /**
@@ -42,9 +42,16 @@ function DeleteConfirmationModal(props){
  */
 function CustomerLine(props){
 
+    const dispatch = useDispatch();
+
     //handle click event on any button of the row
     function handleOnClick(customer){
         props.setCustomerSelected(customer);
+    }
+
+    function handleOnClickLocations(customer){
+        props.setCustomerSelected(customer);
+        dispatch(setLocations(customer.locations));
     }
 
     if(props != null && props.customer != null && props.customer.id != null){
@@ -56,7 +63,7 @@ function CustomerLine(props){
                 <td>{customer.last_name}</td>
                 <td>{customer.email}</td>
                 <td>{customer.phone}</td>
-                <td><button type="button" onClick={()=>handleOnClick(props.customer)} className="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">{customer.locations.length} Location(s)</button></td>
+                <td><button type="button" onClick={()=>handleOnClickLocations(props.customer)} className="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">{customer.locations.length} Location(s)</button></td>
                 <td><button type="button" onClick={()=>handleOnClick(props.customer)} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">Update</button></td>
                 <td><button type="button" onClick={()=>handleOnClick(props.customer)} className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCustomerConfirm">Delete</button></td>
             </tr>
@@ -145,14 +152,13 @@ export default function CustomerList(){
     //render the feature
     return(
         <>
-            <h1>Customers List</h1>
+            <h1>Customer List</h1>
             <br/>
             <p><button type="button" className="btn btn-primary" onClick={() => setCustomerSelected(null)} data-bs-toggle="modal" data-bs-target="#customerForm">New Customer</button></p>
             {customerTable}
             <CustomerForm customer={customerSelected} />
             <DeleteConfirmationModal customer={customerSelected} handleClickDeleteCustomer={handleClickDeleteCustomer} />
             <LocationList customer={customerSelected} />
-            <LocationForm />
         </>
     );
 }

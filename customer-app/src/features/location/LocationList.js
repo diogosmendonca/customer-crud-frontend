@@ -1,7 +1,16 @@
-import React from 'react';
+import React, {useState} from 'react';
+import LocationForm from '../location/LocationForm';
+import {useSelector, useDispatch} from 'react-redux';
+import {deleteLocationServer, selectAllLocations} from './LocationsSlice';
+import {fetchCustomers} from '../customer/CustomersSlice';
 
-
-function DeleteConfirmationModal(){
+/**
+ * Modal of Delete Confirmation component
+ * 
+ * @param {location} props 
+ * @returns 
+ */
+function DeleteConfirmationModal(props){
     return(
         <div className="modal fade" id="deleteLocationConfirm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog">
@@ -11,11 +20,11 @@ function DeleteConfirmationModal(){
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-                <p>Confirm the excluison of the location?</p>
+                <p>Confirm the excluison of the location {props?.location?.address}?</p>
             </div>
             <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#locationList">Close</button>
-                <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#locationList">Delete</button>
+                <button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#locationList" onClick={() => props.handleClickDeleteLocation()}>Delete</button>
             </div>
             </div>
         </div>
@@ -24,8 +33,20 @@ function DeleteConfirmationModal(){
 }
 
 
-
+/**
+ * Location Line component
+ * 
+ * @param {location} props 
+ * @returns 
+ */
 function LocationLine(props){
+
+    
+    //handle click event on any button of the row
+    function handleOnClick(location){
+        props.setLocationSelected(location);
+    }
+
     if(props != null && props.location != null && props.location.id != null){
         let location = props.location;
         return(
@@ -35,7 +56,7 @@ function LocationLine(props){
                 <td>{location.city}</td>
                 <td>{location.state}</td>
                 <td>{location.zip}</td>
-                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
+                <td><button type="button" onClick={()=>handleOnClick(props.location)} className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
             </tr>
         );
     }else{
@@ -64,7 +85,7 @@ function LocationTable(props){
                     </tr>
                 </thead>
                 <tbody>
-                    {props.locations.map((location) => <LocationLine key={location.id} location={location} />)}
+                    {props.locations.map((location) => <LocationLine key={location.id} location={location} setLocationSelected={props.setLocationSelected}/>)}
                 </tbody>
             </table>
             );
@@ -75,20 +96,34 @@ function LocationTable(props){
 
 export default function LocationList(props){
 
+    //state for selected location
+    const [locationSelected, setLocationSelected] = useState();
+    const dispatch = useDispatch();
+    
+    const locations = useSelector(selectAllLocations)
+    
+    //rendes the location table
     let locationTable = "";
-    if(props != null && props.customer != null){
-        locationTable = <LocationTable locations={props.customer.locations} />;
+    if(locations != null){
+        locationTable = <LocationTable locations={locations} setLocationSelected={setLocationSelected} />;
     }else{
         locationTable = <LocationTable/>;
     }
-  
+
+    //handle delete event
+    async function handleClickDeleteLocation(){
+        await dispatch(deleteLocationServer(locationSelected.id)).unwrap();
+        dispatch(fetchCustomers());
+    }
+    
+    //render the feature
     return(
         <>
             <div className="modal fade " id="locationList" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog modal-xl modal-fullscreen-lg-down">
                     <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title" id="exampleModalLabel">Locations for customer: First Name Last Name</h5>
+                        <h5 className="modal-title" id="exampleModalLabel">Locations for customer: {props?.customer?.first_name + " " + props?.customer?.last_name}</h5>
                         <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div className="modal-body">
@@ -101,7 +136,8 @@ export default function LocationList(props){
                     </div>
                 </div>
             </div>
-            <DeleteConfirmationModal />
+            <DeleteConfirmationModal location={locationSelected} handleClickDeleteLocation={handleClickDeleteLocation} />
+            <LocationForm customer={props.customer} />
         </>
     );
 }
