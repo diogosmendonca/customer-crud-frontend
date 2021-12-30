@@ -1,13 +1,18 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import LocationForm from '../location/LocationForm';
 import LocationList from '../location/LocationList';
 import CustomerForm from './CustomerForm';
 import {useSelector, useDispatch} from 'react-redux';
-import {deleteCustomersServer, fetchCustomers, selectAllCustomers} from './CustomersSlice'
+import {deleteCustomerServer, fetchCustomers, selectAllCustomers} from './CustomersSlice'
 
 
-
-function DeleteConfirmationModal(){
+/**
+ * Modal of Delete Confirmation component
+ * 
+ * @param {customer} props 
+ * @returns 
+ */
+function DeleteConfirmationModal(props){
     return(
         <div className="modal fade" id="deleteCustomerConfirm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div className="modal-dialog">
@@ -17,11 +22,11 @@ function DeleteConfirmationModal(){
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-                <p>Confirm the excluison of the customer?</p>
+                <p>Confirm the excluison of the customer {props?.customer?.first_name + " " + props?.customer?.last_name}?</p>
             </div>
             <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" className="btn btn-danger">Delete</button>
+                <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={() => props.handleClickDeleteCustomer()}>Delete</button>
             </div>
             </div>
         </div>
@@ -29,7 +34,18 @@ function DeleteConfirmationModal(){
     )
 }
 
+/**
+ * Customer Line component
+ * 
+ * @param {customer} props 
+ * @returns 
+ */
 function CustomerLine(props){
+
+    //handle click event on any button of the row
+    function handleOnClick(customer){
+        props.setCustomerSelected(customer);
+    }
 
     if(props != null && props.customer != null && props.customer.id != null){
         let customer = props.customer;
@@ -40,9 +56,9 @@ function CustomerLine(props){
                 <td>{customer.last_name}</td>
                 <td>{customer.email}</td>
                 <td>{customer.phone}</td>
-                <td><button type="button" className="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">{customer.locations.length} Location(s)</button></td>
-                <td><button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">Update</button></td>
-                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCustomerConfirm">Delete</button></td>
+                <td><button type="button" onClick={()=>handleOnClick(props.customer)} className="btn btn-info" data-bs-toggle="modal" data-bs-target="#locationList">{customer.locations.length} Location(s)</button></td>
+                <td><button type="button" onClick={()=>handleOnClick(props.customer)} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">Update</button></td>
+                <td><button type="button" onClick={()=>handleOnClick(props.customer)} className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCustomerConfirm">Delete</button></td>
             </tr>
         );
     }else{
@@ -54,6 +70,12 @@ function CustomerLine(props){
     }
 }
 
+/**
+ * Customer Table component
+ * 
+ * @param {customers, setCustomerSelected} props 
+ * @returns 
+ */
 function CustomerTable(props){
     if(props != null && props.customers != null && props.customers.length > 0){
         return(
@@ -71,7 +93,7 @@ function CustomerTable(props){
                     </tr>
                 </thead>
                 <tbody>
-                    {props.customers.map((customer) => <CustomerLine key={customer.id} customer={customer} />)}
+                    {props.customers.map((customer) => <CustomerLine key={customer.id} customer={customer} setCustomerSelected={props.setCustomerSelected} />)}
                 </tbody>
             </table>
             );
@@ -81,24 +103,36 @@ function CustomerTable(props){
     
 }
 
+/**
+ * Customer List feature component
+ */
 export default function CustomerList(){
 
+    //init hooks
     const customers = useSelector(selectAllCustomers)
     const status = useSelector(state => state.customers.status);
     const error = useSelector(state => state.customers.error);
-
     const dispatch = useDispatch();
 
+    //load the customer list from backend api
     useEffect(() => {
         if (status === 'not_loaded' ) {
             dispatch(fetchCustomers())
         }
     }, [status, dispatch])
+
+    //state for selected customer
+    const [customerSelected, setCustomerSelected] = useState();
     
+    //handle delete event
+    function handleClickDeleteCustomer(){
+        dispatch(deleteCustomerServer(customerSelected.id));
+    }
     
+    //decides how to render the table given state of customer interaction with the server
     let customerTable;
-    if(status === 'loaded' || status === 'saved' || status === 'deleted'){
-      customerTable = <CustomerTable customers={customers} />;
+    if(status === 'loaded' || status === 'created' || status === 'saved' || status === 'deleted' || status === 'validation_failed'){
+      customerTable = <CustomerTable customers={customers} setCustomerSelected={setCustomerSelected} />;
     }else if(status === 'loading'){
       customerTable = <div >Loading customers...</div>;
     }else if(status === 'not_loaded'){
@@ -108,15 +142,16 @@ export default function CustomerList(){
       customerTable = <div>Error: {error}</div>;
     }
     
+    //render the feature
     return(
         <>
             <h1>Customers List</h1>
             <br/>
-            <p><button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerForm">New Customer</button></p>
+            <p><button type="button" className="btn btn-primary" onClick={() => setCustomerSelected(null)} data-bs-toggle="modal" data-bs-target="#customerForm">New Customer</button></p>
             {customerTable}
-            <CustomerForm/>
-            <DeleteConfirmationModal />
-            <LocationList />
+            <CustomerForm customer={customerSelected} />
+            <DeleteConfirmationModal customer={customerSelected} handleClickDeleteCustomer={handleClickDeleteCustomer} />
+            <LocationList customer={customerSelected} />
             <LocationForm />
         </>
     );

@@ -23,7 +23,65 @@ function DeleteConfirmationModal(){
     )
 }
 
-export default function LocationList(){
+
+
+function LocationLine(props){
+    if(props != null && props.location != null && props.location.id != null){
+        let location = props.location;
+        return(
+            <tr>
+                <td>{location.id}</td>
+                <td>{location.address}</td>
+                <td>{location.city}</td>
+                <td>{location.state}</td>
+                <td>{location.zip}</td>
+                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
+            </tr>
+        );
+    }else{
+        return(
+            <tr>
+                <td colSpan={6}>It was not possible to show the location.</td>
+            </tr>
+        );
+    }
+}
+
+
+
+function LocationTable(props){
+    if(props != null && props.locations != null && props.locations.length > 0){
+        return(
+            <table className="table table-striped">
+                <thead className="table-light ">
+                    <tr>
+                        <th>Id</th>
+                        <th>Address</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Zip Code</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {props.locations.map((location) => <LocationLine key={location.id} location={location} />)}
+                </tbody>
+            </table>
+            );
+    }else{
+        return(<div>No locations found.</div>)
+    }
+}
+
+export default function LocationList(props){
+
+    let locationTable = "";
+    if(props != null && props.customer != null){
+        locationTable = <LocationTable locations={props.customer.locations} />;
+    }else{
+        locationTable = <LocationTable/>;
+    }
+  
     return(
         <>
             <div className="modal fade " id="locationList" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -35,36 +93,7 @@ export default function LocationList(){
                     </div>
                     <div className="modal-body">
                         <p><button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#locationForm">New Location</button></p>
-                        <table className="table table-striped">
-                            <thead className="table-light ">
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Address</th>
-                                    <th>City</th>
-                                    <th>State</th>
-                                    <th>Zip Code</th>
-                                    <th>Delete</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>8600 Terry Lodge Apt. 013\nSouth Makennabury, DC 97794-3344</td>
-                                <td>East Loyview</td>
-                                <td>Minnesota</td>
-                                <td>14204</td>
-                                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>412 Hirthe Street Apt. 415\nTheresiabury, NE 20284-3416</td>
-                                <td>Lake Margretbury</td>
-                                <td>California</td>
-                                <td>18400</td>
-                                <td><button type="button" className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteLocationConfirm">Delete</button></td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        {locationTable}
                     </div>
                     <div className="modal-footer">
                         <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
